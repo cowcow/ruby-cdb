@@ -1,4 +1,5 @@
 *.so
 *.o
 *.cdb
+*.log
 Makefile
