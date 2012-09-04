@@ -1,12 +1,13 @@
 #include "cdb_ext.h"
 
 int open_cdb_fd(VALUE reader) {
+  int fd;
   VALUE filename = rb_iv_get(reader,"@filename");
   if(filename == Qnil) {
     rb_raise(rb_eRuntimeError,"no filename set?");
   }
   StringValue(filename);
-  int fd = open(StringValueCStr(filename), O_RDONLY);
+  fd = open(StringValueCStr(filename), O_RDONLY);
   if(fd == -1) {
     rb_raise(rb_eRuntimeError,"unable to open filename");
   }
@@ -15,11 +16,12 @@ int open_cdb_fd(VALUE reader) {
 
 
 VALUE mCDB_Reader_get(VALUE self, VALUE key) {
+  int fd;
   struct cdb db;
   VALUE value;
-  StringValue(key);
-  int fd = open_cdb_fd(self);
   size_t vlen;
+  StringValue(key);
+  fd = open_cdb_fd(self);
   cdb_init(&db,fd);
   if(cdb_find(&db,RSTRING_PTR(key),RSTRING_LEN(key)) > 0) {
     vlen = cdb_datalen(&db);
@@ -33,12 +35,13 @@ VALUE mCDB_Reader_get(VALUE self, VALUE key) {
 }
 
 VALUE mCDB_Reader_each_for_key(VALUE self,VALUE key) {
+  int fd;
   struct cdb db;
   VALUE value;
   struct cdb_find find;
-  StringValue(key);
-  int fd = open_cdb_fd(self);
   size_t vlen;
+  StringValue(key);
+  fd = open_cdb_fd(self);
   cdb_init(&db,fd);
   cdb_findinit(&find,&db,RSTRING_PTR(key),RSTRING_LEN(key));
   while(cdb_findnext(&find) > 0) {
